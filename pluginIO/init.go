@@ -91,6 +91,11 @@ func SendData(cmd string, args ...string) {
 			return
 		}
 	}
+	_, err = outWriter.Write([]byte("\n"))
+	if err != nil {
+		log.Println("write error:", err)
+		return
+	}
 	err = outWriter.Flush()
 	if err != nil {
 		log.Println("flush error:", err)
