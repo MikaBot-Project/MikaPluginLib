@@ -6,9 +6,12 @@ import (
 	"time"
 )
 
+func test(msg pluginIO.Message) {
+	log.Println("post type:", msg.PostType)
+}
+
 func main() {
 	log.Println("hello test log")
-	pluginIO.SendData("init", "test", "args")
 	go func() {
 		var data pluginIO.Message
 		for {
@@ -17,6 +20,9 @@ func main() {
 			log.Println("echo: ", data.RawMessage)
 		}
 	}()
+	pluginIO.MessageRegister(test)
+	pluginIO.NoticeRegister("poke", test)
+	pluginIO.CommandRegister("!test", test)
 	for {
 		time.Sleep(10 * time.Second)
 		pluginIO.SendData("send_msg", "test", "args")

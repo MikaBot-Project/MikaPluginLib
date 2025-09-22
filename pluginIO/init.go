@@ -44,12 +44,19 @@ type Message struct {
 
 var inReader *bufio.Reader
 var outWriter *bufio.Writer
+var sendRecvMap map[string]Message
 var MessageChan chan Message
+var commandMap map[string]func(Message)
+var noticeMap map[string][]func(Message)
+var messageMap []func(Message)
 
 func init() {
 	inReader = bufio.NewReader(os.Stdin)
 	outWriter = bufio.NewWriter(os.Stdout)
 	MessageChan = make(chan Message)
+	sendRecvMap = make(map[string]Message)
+	commandMap = make(map[string]func(Message))
+	noticeMap = make(map[string][]func(Message))
 	go func() {
 		var msg Message
 		var data []byte
@@ -68,9 +75,25 @@ func init() {
 				log.Println("unmarshal error:", err)
 				return
 			}
-			MessageChan <- msg
+			switch msg.PostType {
+			case "return":
+				sendRecvMap[msg.MessageType] = msg
+			case "message":
+				for _, callback := range messageMap {
+					callback(msg)
+				}
+			case "command":
+				commandMap[msg.MetaEventType](msg)
+			case "notice":
+				for _, callback := range noticeMap[msg.NoticeType] {
+					callback(msg)
+				}
+			default:
+				MessageChan <- msg
+			}
 		}
 	}()
+	SendData("init", "v0.1.0", "test")
 }
 
 func SendData(cmd string, args ...string) {
