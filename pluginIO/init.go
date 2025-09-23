@@ -35,7 +35,7 @@ type Message struct {
 	MessageType   string        `json:"message_type"`
 	SubType       string        `json:"sub_type"`
 	MessageId     int64         `json:"message_id"`
-	MessageArray  []MessageItem `json:"messages"`
+	MessageArray  []MessageItem `json:"message"`
 	RawMessage    string        `json:"raw_message"`
 	NoticeType    string        `json:"notice_type"`
 	TargetId      int64         `json:"target_id"`
@@ -80,13 +80,13 @@ func init() {
 				sendRecvMap[msg.MessageType] = msg
 			case "message":
 				for _, callback := range messageMap {
-					callback(msg)
+					go callback(msg)
 				}
 			case "command":
-				commandMap[msg.MetaEventType](msg)
+				go commandMap[msg.MetaEventType](msg)
 			case "notice":
 				for _, callback := range noticeMap[msg.NoticeType] {
-					callback(msg)
+					go callback(msg)
 				}
 			default:
 				MessageChan <- msg
