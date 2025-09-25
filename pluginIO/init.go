@@ -40,6 +40,8 @@ type Message struct {
 	NoticeType    string        `json:"notice_type"`
 	TargetId      int64         `json:"target_id"`
 	MetaEventType string        `json:"meta_event_type"`
+	AtMe          bool          `json:"at_me"`
+	CommandArgs   []string      `json:"command_args"`
 }
 
 var inReader *bufio.Reader
@@ -83,7 +85,7 @@ func init() {
 					go callback(msg)
 				}
 			case "command":
-				go commandMap[msg.MetaEventType](msg)
+				go commandMap[msg.CommandArgs[0]](msg)
 			case "notice":
 				for _, callback := range noticeMap[msg.NoticeType] {
 					go callback(msg)
@@ -93,7 +95,7 @@ func init() {
 			}
 		}
 	}()
-	SendData("init", "v0.1.0", "test")
+	SendData("init", "v1")
 }
 
 func SendData(cmd string, args ...string) {

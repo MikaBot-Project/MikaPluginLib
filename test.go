@@ -1,9 +1,16 @@
 package main
 
 import (
+	"MikaPluginLib/pluginConfig"
 	"MikaPluginLib/pluginIO"
 	"log"
 )
+
+var config = struct {
+	Text string `json:"text"`
+}{
+	Text: "test",
+}
 
 func test(msg pluginIO.Message) {
 	log.Println("post type:", msg.PostType)
@@ -14,8 +21,23 @@ func test(msg pluginIO.Message) {
 		if msg.GroupId == 0 {
 			log.Println("messageId", pluginIO.SendMessage(msg.MessageArray, msg.UserId, 0))
 		}
+		if msg.AtMe {
+			log.Println("messageId", pluginIO.SendMessage(msg.MessageArray, msg.UserId, msg.GroupId))
+		}
 	case "command":
-		log.Println("messageId", pluginIO.SendMessage("get cmd"+msg.MetaEventType, msg.UserId, msg.GroupId))
+		log.Println("messageId", pluginIO.SendMessage("get cmd "+msg.CommandArgs[0], msg.UserId, msg.GroupId))
+		if len(msg.CommandArgs) < 2 {
+			log.Println("messageId", pluginIO.SendMessage(config.Text, msg.UserId, msg.GroupId))
+			return
+		}
+		switch msg.CommandArgs[1] {
+		case "set":
+			if len(msg.CommandArgs) < 3 {
+				return
+			}
+			config.Text = msg.CommandArgs[2]
+			pluginConfig.SaveJson("test.json", config)
+		}
 	}
 }
 
@@ -24,6 +46,7 @@ func main() {
 	pluginIO.MessageRegister(test)
 	pluginIO.NoticeRegister("notify", test)
 	pluginIO.CommandRegister("!test", test)
+	pluginConfig.ReadJson("test.json", &config)
 	var data pluginIO.Message
 	for {
 		data = <-pluginIO.MessageChan
