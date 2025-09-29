@@ -12,11 +12,18 @@ type MessageItem struct {
 	Data map[string]any `json:"data"`
 }
 
-func (item *MessageItem) Get(name string) string {
+func (item *MessageItem) GetString(name string) string {
 	if val, ok := item.Data[name]; ok {
 		return val.(string)
 	}
 	return ""
+}
+
+func (item *MessageItem) GetNumber(name string) int {
+	if val, ok := item.Data[name]; ok {
+		return val.(int)
+	}
+	return 0
 }
 
 func (item *MessageItem) Set(name string, value any) {
@@ -95,10 +102,9 @@ func init() {
 			}
 		}
 	}()
-	SendData("init", "v1")
 }
 
-func SendData(cmd string, args ...string) {
+func sendData(cmd string, args ...string) {
 	_, err := outWriter.Write([]byte(cmd))
 	if err != nil {
 		log.Println("write error:", err)

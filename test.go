@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"strconv"
 
 	"github.com/MikaBot-Project/MikaPluginLib/pluginConfig"
 	"github.com/MikaBot-Project/MikaPluginLib/pluginIO"
@@ -20,7 +19,7 @@ func test(msg pluginIO.Message) {
 	case "notice":
 		log.Println("notice subtype", msg.SubType)
 		if msg.SubType == "poke" && msg.TargetId == msg.SelfId {
-			pluginIO.SendData("send_poke", strconv.FormatInt(msg.UserId, 10), strconv.FormatInt(msg.GroupId, 10))
+			pluginIO.SendPoke(msg.UserId, msg.GroupId)
 		}
 	case "message":
 		if msg.GroupId == 0 {

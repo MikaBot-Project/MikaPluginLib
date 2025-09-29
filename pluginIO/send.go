@@ -29,13 +29,13 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 	message := any(msg)
 	switch message.(type) {
 	case string:
-		SendData("send_msg",
+		sendData("send_msg",
 			strconv.FormatInt(userId, 10),
 			strconv.FormatInt(groupId, 10),
 			message.(string), echo)
 	case []MessageItem:
 		data, _ := json.Marshal(message.([]MessageItem))
-		SendData("send_msg",
+		sendData("send_msg",
 			strconv.FormatInt(userId, 10),
 			strconv.FormatInt(groupId, 10),
 			string(data), echo)
@@ -51,11 +51,34 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 
 func SendApi(apiName string, data []byte) []byte {
 	echo := fmt.Sprintf("send_api_%s", RandomString(64))
-	SendData("send_api", apiName, string(data), echo)
+	sendData("send_api", apiName, string(data), echo)
 	defer delete(sendRecvMap, echo)
 	var exists = false
 	for !exists {
 		_, exists = sendRecvMap[echo]
 	}
 	return []byte(sendRecvMap[echo].RawMessage)
+}
+
+func SendPoke(userId int64, groupId int64) {
+	sendData("send_poke", strconv.FormatInt(userId, 10), strconv.FormatInt(groupId, 10))
+}
+
+func SendData(cmd string, args []string, hasReturn bool) string {
+	echo := ""
+	if hasReturn {
+		echo = RandomString(64)
+		args = append(args, echo)
+	}
+	sendData(cmd, args...)
+	if hasReturn {
+		defer delete(sendRecvMap, echo)
+		var exists = false
+		for !exists {
+			_, exists = sendRecvMap[echo]
+		}
+		return sendRecvMap[echo].RawMessage
+	} else {
+		return ""
+	}
 }
