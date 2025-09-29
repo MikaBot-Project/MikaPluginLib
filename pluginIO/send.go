@@ -40,24 +40,28 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 			strconv.FormatInt(groupId, 10),
 			string(data), echo)
 	}
-	defer delete(sendRecvMap, echo)
+	defer sendRecvMap.Delete(echo)
 	var exists = false
+	var recv interface{}
 	for !exists {
-		_, exists = sendRecvMap[echo]
+		time.Sleep(100 * time.Millisecond)
+		recv, exists = sendRecvMap.Get(echo)
 	}
-	_ = json.Unmarshal([]byte(sendRecvMap[echo].RawMessage), &messageId)
+	_ = json.Unmarshal([]byte(recv.(Message).RawMessage), &messageId)
 	return messageId
 }
 
 func SendApi(apiName string, data []byte) []byte {
 	echo := fmt.Sprintf("send_api_%s", RandomString(64))
 	sendData("send_api", apiName, string(data), echo)
-	defer delete(sendRecvMap, echo)
+	defer sendRecvMap.Delete(echo)
 	var exists = false
+	var msg interface{}
 	for !exists {
-		_, exists = sendRecvMap[echo]
+		time.Sleep(100 * time.Millisecond)
+		msg, exists = sendRecvMap.Get(echo)
 	}
-	return []byte(sendRecvMap[echo].RawMessage)
+	return []byte(msg.(Message).RawMessage)
 }
 
 func SendPoke(userId int64, groupId int64) {
@@ -72,12 +76,14 @@ func SendData(cmd string, args []string, hasReturn bool) string {
 	}
 	sendData(cmd, args...)
 	if hasReturn {
-		defer delete(sendRecvMap, echo)
+		defer sendRecvMap.Delete(echo)
 		var exists = false
+		var msg interface{}
 		for !exists {
-			_, exists = sendRecvMap[echo]
+			time.Sleep(100 * time.Millisecond)
+			msg, exists = sendRecvMap.Get(echo)
 		}
-		return sendRecvMap[echo].RawMessage
+		return msg.(Message).RawMessage
 	} else {
 		return ""
 	}

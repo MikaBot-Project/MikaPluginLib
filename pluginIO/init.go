@@ -53,7 +53,7 @@ type Message struct {
 
 var inReader *bufio.Reader
 var outWriter *bufio.Writer
-var sendRecvMap map[string]Message
+var sendRecvMap *SafeMap
 var MessageChan chan Message
 var commandMap map[string]func(Message)
 var noticeMap map[string][]func(Message)
@@ -63,7 +63,7 @@ func init() {
 	inReader = bufio.NewReader(os.Stdin)
 	outWriter = bufio.NewWriter(os.Stdout)
 	MessageChan = make(chan Message)
-	sendRecvMap = make(map[string]Message)
+	sendRecvMap = NewSafeMap()
 	commandMap = make(map[string]func(Message))
 	noticeMap = make(map[string][]func(Message))
 	go func() {
@@ -86,7 +86,7 @@ func init() {
 			}
 			switch msg.PostType {
 			case "return":
-				sendRecvMap[msg.MessageType] = msg
+				sendRecvMap.Set(msg.MessageType, msg)
 			case "message":
 				for _, callback := range messageMap {
 					go callback(msg)
