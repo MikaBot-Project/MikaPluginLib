@@ -79,6 +79,7 @@ func init() {
 				log.Println("read error:", err)
 				return
 			}
+			msg = Message{}
 			err = json.Unmarshal(data, &msg)
 			if err != nil {
 				log.Println("unmarshal error:", err)

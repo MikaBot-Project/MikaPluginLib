@@ -73,7 +73,6 @@ func ReadAllJson[T any](path string, config *map[string]T) {
 		if nameArr[len(nameArr)-1] != "json" {
 			continue
 		}
-		log.Println(jsonFile.Name())
 		var msgMap T
 		ReadJson(filepath.Join(path, jsonFile.Name()), &msgMap)
 		(*config)[strings.Join(nameArr[:len(nameArr)-1], ".")] = msgMap
