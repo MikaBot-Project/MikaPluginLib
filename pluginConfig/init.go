@@ -8,9 +8,13 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/MikaBot-Project/MikaPluginLib/pluginIO"
 )
 
 var ConfigPath string
+var readJsonMap map[string]any
+var readAllJsonMap map[string]any
 
 func init() {
 	ConfigPath = os.Args[1]
@@ -19,9 +23,11 @@ func init() {
 		log.Fatal(err)
 		return
 	}
+	pluginIO.OperatorMap["config"] = operatorHandler
 }
 
 func ReadJson(fileName string, config any) {
+	readJsonMap[fileName] = config
 	jsonFile, err := os.OpenFile(fmt.Sprintf("%s%s", ConfigPath, fileName),
 		os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -57,6 +63,7 @@ func ReadJson(fileName string, config any) {
 }
 
 func ReadAllJson[T any](path string, config *map[string]T) {
+	readAllJsonMap[path] = *config
 	*config = make(map[string]T)
 	DirPath := filepath.Join(ConfigPath, path)
 	err := os.MkdirAll(DirPath, 0755)

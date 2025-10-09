@@ -58,6 +58,7 @@ var MessageChan chan Message
 var commandMap map[string]func(Message)
 var noticeMap map[string][]func(Message)
 var messageMap []func(Message)
+var OperatorMap map[string]func(Message)
 
 func init() {
 	inReader = bufio.NewReader(os.Stdin)
@@ -66,6 +67,7 @@ func init() {
 	sendRecvMap = NewSafeMap()
 	commandMap = make(map[string]func(Message))
 	noticeMap = make(map[string][]func(Message))
+	OperatorMap = make(map[string]func(Message))
 	go func() {
 		var msg Message
 		var data []byte
@@ -86,6 +88,11 @@ func init() {
 				return
 			}
 			switch msg.PostType {
+			case "operator":
+				handler, ok := OperatorMap[msg.MessageType]
+				if ok {
+					handler(msg)
+				}
 			case "return":
 				sendRecvMap.Set(msg.MessageType, msg)
 			case "message":
