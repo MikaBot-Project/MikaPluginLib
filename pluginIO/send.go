@@ -88,3 +88,8 @@ func SendData(cmd string, args []string, hasReturn bool) string {
 		return ""
 	}
 }
+
+func SendOperator(target, operator string, args []string) {
+	args = append([]string{target, operator}, args...)
+	sendData("operator", args...)
+}
