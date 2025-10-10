@@ -17,6 +17,8 @@ var readJsonMap map[string]any
 var readAllJsonMap map[string]any
 
 func init() {
+	readJsonMap = make(map[string]any)
+	readAllJsonMap = make(map[string]any)
 	ConfigPath = os.Args[1]
 	err := os.MkdirAll(filepath.Dir(ConfigPath), 0755)
 	if err != nil {
