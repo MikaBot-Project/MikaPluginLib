@@ -12,15 +12,15 @@ import (
 	"github.com/MikaBot-Project/MikaPluginLib/pluginIO"
 )
 
-var ConfigPath string
+var configPath string
 var readJsonMap map[string]any
 var readAllJsonMap map[string]any
 
 func init() {
 	readJsonMap = make(map[string]any)
 	readAllJsonMap = make(map[string]any)
-	ConfigPath = os.Args[1]
-	err := os.MkdirAll(filepath.Dir(ConfigPath), 0755)
+	configPath = os.Args[1]
+	err := os.MkdirAll(filepath.Dir(configPath), 0755)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -30,7 +30,7 @@ func init() {
 
 func ReadJson(fileName string, config any) {
 	readJsonMap[fileName] = config
-	jsonFile, err := os.OpenFile(fmt.Sprintf("%s%s", ConfigPath, fileName),
+	jsonFile, err := os.OpenFile(fmt.Sprintf("%s%s", configPath, fileName),
 		os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +67,7 @@ func ReadJson(fileName string, config any) {
 func ReadAllJson[T any](path string, config *map[string]T) {
 	readAllJsonMap[path] = *config
 	*config = make(map[string]T)
-	DirPath := filepath.Join(ConfigPath, path)
+	DirPath := filepath.Join(configPath, path)
 	err := os.MkdirAll(DirPath, 0755)
 	if err != nil {
 		log.Fatal(err)
@@ -89,7 +89,7 @@ func ReadAllJson[T any](path string, config *map[string]T) {
 }
 
 func SaveJson(fileName string, config any) {
-	jsonFile, err := os.OpenFile(fmt.Sprintf("%s%s", ConfigPath, fileName),
+	jsonFile, err := os.OpenFile(fmt.Sprintf("%s%s", configPath, fileName),
 		os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Fatal(err)

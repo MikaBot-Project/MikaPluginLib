@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/MikaBot-Project/MikaPluginLib/pluginConfig"
+	"github.com/MikaBot-Project/MikaPluginLib/pluginFile"
 	"github.com/MikaBot-Project/MikaPluginLib/pluginIO"
 )
 
@@ -20,8 +22,13 @@ func test(msg pluginIO.Message) {
 		log.Println("notice subtype", msg.SubType)
 		if msg.SubType == "poke" && msg.TargetId == msg.SelfId {
 			pluginIO.SendPoke(msg.UserId, msg.GroupId)
+			var data []pluginIO.MessageItem
+			pluginFile.ReadJson("j/"+strconv.FormatInt(msg.UserId, 10), &data)
+			pluginIO.SendMessage(data, msg.UserId, msg.GroupId)
 		}
 	case "message":
+		pluginFile.SaveBinary("b/"+strconv.FormatInt(msg.UserId, 10), msg.RawMessage)
+		pluginFile.SaveJson("j/"+strconv.FormatInt(msg.UserId, 10), msg.MessageArray)
 		if msg.GroupId == 0 {
 			log.Println("messageId", pluginIO.SendMessage(msg.MessageArray, msg.UserId, 0))
 		}
@@ -29,7 +36,6 @@ func test(msg pluginIO.Message) {
 			log.Println("messageId", pluginIO.SendMessage(msg.MessageArray, msg.UserId, msg.GroupId))
 		}
 	case "command":
-		log.Println("messageId", pluginIO.SendMessage("get cmd "+msg.CommandArgs[0], msg.UserId, msg.GroupId))
 		if len(msg.CommandArgs) < 2 {
 			log.Println("messageId", pluginIO.SendMessage(config.Text, msg.UserId, msg.GroupId))
 			return
@@ -41,6 +47,10 @@ func test(msg pluginIO.Message) {
 			}
 			config.Text = msg.CommandArgs[2]
 			pluginConfig.SaveJson("test.json", config)
+		case "msg":
+			var data string
+			pluginFile.ReadBinary("b/"+strconv.FormatInt(msg.UserId, 10), &data)
+			pluginIO.SendMessage(data, msg.UserId, msg.GroupId)
 		}
 	}
 }
