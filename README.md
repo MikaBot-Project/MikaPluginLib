@@ -13,6 +13,7 @@
 在项目目录下运行以下指令，即可导入仓库
 
 ~~~bash
+go mod init
 go get github.com/MikaBot-Project/MikaPluginLib@latest
 ~~~
 
