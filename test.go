@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/MikaBot-Project/MikaPluginLib/pluginConfig"
-	"github.com/MikaBot-Project/MikaPluginLib/pluginFile"
+	"github.com/MikaBot-Project/MikaPluginLib/pluginData"
 	"github.com/MikaBot-Project/MikaPluginLib/pluginIO"
 )
 
@@ -23,12 +23,12 @@ func test(msg pluginIO.Message) {
 		if msg.SubType == "poke" && msg.TargetId == msg.SelfId {
 			pluginIO.SendPoke(msg.UserId, msg.GroupId)
 			var data []pluginIO.MessageItem
-			pluginFile.ReadJson("j/"+strconv.FormatInt(msg.UserId, 10), &data)
+			pluginData.ReadJson("j/"+strconv.FormatInt(msg.UserId, 10), &data)
 			pluginIO.SendMessage(data, msg.UserId, msg.GroupId)
 		}
 	case "message":
-		pluginFile.SaveBinary("b/"+strconv.FormatInt(msg.UserId, 10), msg.RawMessage)
-		pluginFile.SaveJson("j/"+strconv.FormatInt(msg.UserId, 10), msg.MessageArray)
+		pluginData.SaveBinary("b/"+strconv.FormatInt(msg.UserId, 10), msg.RawMessage)
+		pluginData.SaveJson("j/"+strconv.FormatInt(msg.UserId, 10), msg.MessageArray)
 		if msg.GroupId == 0 {
 			log.Println("messageId", pluginIO.SendMessage(msg.MessageArray, msg.UserId, 0))
 		}
@@ -49,7 +49,7 @@ func test(msg pluginIO.Message) {
 			pluginConfig.SaveJson("test.json", config)
 		case "msg":
 			var data string
-			pluginFile.ReadBinary("b/"+strconv.FormatInt(msg.UserId, 10), &data)
+			pluginData.ReadBinary("b/"+strconv.FormatInt(msg.UserId, 10), &data)
 			pluginIO.SendMessage(data, msg.UserId, msg.GroupId)
 		}
 	}

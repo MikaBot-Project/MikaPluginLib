@@ -1,4 +1,4 @@
-package pluginFile
+package pluginData
 
 import (
 	"log"
