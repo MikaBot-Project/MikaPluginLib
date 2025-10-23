@@ -43,12 +43,25 @@ type Message struct {
 	SubType       string        `json:"sub_type"`
 	MessageId     int64         `json:"message_id"`
 	MessageArray  []MessageItem `json:"message"`
+	MessageFormat string        `json:"message_format"`
 	RawMessage    string        `json:"raw_message"`
-	NoticeType    string        `json:"notice_type"`
-	TargetId      int64         `json:"target_id"`
-	MetaEventType string        `json:"meta_event_type"`
-	AtMe          bool          `json:"at_me"`
-	CommandArgs   []string      `json:"command_args"`
+	Sender        struct {
+		UserId   int64  `json:"user_id"`
+		NickName string `json:"nickname"`
+		Sex      string `json:"sex"`
+		GroupId  int64  `json:"group_id"`
+		Card     string `json:"card"`
+		Role     string `json:"role"`
+	} `json:"sender"`
+	NoticeType    string   `json:"notice_type"`
+	TargetId      int64    `json:"target_id"`
+	TempSource    string   `json:"temp_source"`
+	MetaEventType string   `json:"meta_event_type"`
+	RequestType   string   `json:"request_type"`
+	Comment       string   `json:"comment"`
+	Flag          string   `json:"flag"`
+	AtMe          bool     `json:"at_me"`
+	CommandArgs   []string `json:"command_args"`
 }
 
 var inReader *bufio.Reader
