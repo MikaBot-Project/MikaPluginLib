@@ -60,10 +60,17 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 }
 
 func SendApi(apiName string, data []byte) []byte {
-	return SendApiEcho(apiName, data, []byte("\""+fmt.Sprintf("send_api_%s", RandomString(64)+"\"")))
+	return SendApiEcho(apiName, data, fmt.Sprintf("send_api_%s", RandomString(64)))
 }
 
-func SendApiEcho(apiName string, data []byte, echo []byte) []byte {
+func SendApiEcho(apiName string, data []byte, echo any) []byte {
+	var echoData []byte
+	switch echo.(type) {
+	case []byte:
+		echoData = echo.([]byte)
+	default:
+		echoData, _ = json.Marshal(echo)
+	}
 	sendData(struct {
 		Action  string `json:"action"`
 		ApiName string `json:"api_name"`
@@ -73,14 +80,14 @@ func SendApiEcho(apiName string, data []byte, echo []byte) []byte {
 		Action:  "send_api",
 		ApiName: apiName,
 		Data:    data,
-		Echo:    echo,
+		Echo:    echoData,
 	})
-	defer sendRecvMap.Delete(string(echo))
+	defer sendRecvMap.Delete(string(echoData))
 	var exists = false
 	var msg interface{}
 	for !exists {
 		time.Sleep(100 * time.Millisecond)
-		msg, exists = sendRecvMap.Get(string(echo))
+		msg, exists = sendRecvMap.Get(string(echoData))
 	}
 	return []byte(msg.(Message).RawMessage)
 
