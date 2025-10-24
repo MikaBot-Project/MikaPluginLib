@@ -41,7 +41,7 @@ type Message struct {
 	GroupId       int64         `json:"group_id"`
 	GroupName     string        `json:"group_name"`
 	Font          int           `json:"font"`
-	RealSeq       int           `json:"real_seq"`
+	RealSeq       string        `json:"real_seq"`
 	MessageSeq    int           `json:"message_seq"`
 	MessageType   string        `json:"message_type"`
 	SubType       string        `json:"sub_type"`
