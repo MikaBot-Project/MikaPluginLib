@@ -52,7 +52,10 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 }
 
 func SendApi(apiName string, data []byte) []byte {
-	echo := fmt.Sprintf("send_api_%s", RandomString(64))
+	return SendApiEcho(apiName, data, fmt.Sprintf("send_api_%s", RandomString(64)))
+}
+
+func SendApiEcho(apiName string, data []byte, echo string) []byte {
 	sendData("send_api", apiName, string(data), echo)
 	defer sendRecvMap.Delete(echo)
 	var exists = false
@@ -62,13 +65,14 @@ func SendApi(apiName string, data []byte) []byte {
 		msg, exists = sendRecvMap.Get(echo)
 	}
 	return []byte(msg.(Message).RawMessage)
+
 }
 
 func SendPoke(userId int64, groupId int64) {
 	sendData("send_poke", strconv.FormatInt(userId, 10), strconv.FormatInt(groupId, 10))
 }
 
-func SendData(cmd string, args []string, hasReturn bool) string {
+func Send(cmd string, args []string, hasReturn bool) string {
 	echo := ""
 	if hasReturn {
 		echo = RandomString(64)
