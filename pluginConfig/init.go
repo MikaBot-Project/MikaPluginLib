@@ -90,7 +90,7 @@ func ReadAllJson[T any](path string, config *map[string]T) {
 
 func SaveJson(fileName string, config any) {
 	jsonFile, err := os.OpenFile(fmt.Sprintf("%s%s", configPath, fileName),
-		os.O_WRONLY|os.O_CREATE, 0666)
+		os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}

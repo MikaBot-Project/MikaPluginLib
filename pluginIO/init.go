@@ -129,23 +129,12 @@ func init() {
 	}()
 }
 
-func sendData(cmd string, args ...string) {
-	_, err := outWriter.Write([]byte(cmd))
+func sendData(send any) {
+	data, err := json.Marshal(send)
+	_, err = outWriter.Write(data)
 	if err != nil {
 		log.Println("write error:", err)
 		return
-	}
-	for _, arg := range args {
-		_, err = outWriter.Write([]byte(":##:"))
-		if err != nil {
-			log.Println("write error:", err)
-			return
-		}
-		_, err = outWriter.Write([]byte(arg))
-		if err != nil {
-			log.Println("write error:", err)
-			return
-		}
 	}
 	_, err = outWriter.Write([]byte("\n"))
 	if err != nil {

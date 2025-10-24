@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"strconv"
 	"time"
 )
 
@@ -27,19 +26,28 @@ func RandomString(length int) string {
 func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (messageId []int) {
 	echo := fmt.Sprintf("send_msg_%s", RandomString(64))
 	message := any(msg)
+	send := struct {
+		Action  string `json:"action"`
+		UserId  int64  `json:"user_id"`
+		GroupId int64  `json:"group_id"`
+		SubType string `json:"sub_type"`
+		Data    []byte `json:"data"`
+		Echo    []byte `json:"echo"`
+	}{
+		Action:  "send_msg",
+		Echo:    []byte(echo),
+		UserId:  userId,
+		GroupId: groupId,
+	}
 	switch message.(type) {
 	case string:
-		sendData("send_msg",
-			strconv.FormatInt(userId, 10),
-			strconv.FormatInt(groupId, 10),
-			message.(string), echo)
+		send.SubType = "string"
+		send.Data = []byte(message.(string))
 	case []MessageItem:
-		data, _ := json.Marshal(message.([]MessageItem))
-		sendData("send_msg",
-			strconv.FormatInt(userId, 10),
-			strconv.FormatInt(groupId, 10),
-			string(data), echo)
+		send.SubType = "array"
+		send.Data, _ = json.Marshal(msg)
 	}
+	sendData(send)
 	defer sendRecvMap.Delete(echo)
 	var exists = false
 	var recv interface{}
@@ -52,48 +60,54 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 }
 
 func SendApi(apiName string, data []byte) []byte {
-	return SendApiEcho(apiName, data, fmt.Sprintf("send_api_%s", RandomString(64)))
+	return SendApiEcho(apiName, data, []byte("\""+fmt.Sprintf("send_api_%s", RandomString(64)+"\"")))
 }
 
-func SendApiEcho(apiName string, data []byte, echo string) []byte {
-	sendData("send_api", apiName, string(data), echo)
-	defer sendRecvMap.Delete(echo)
+func SendApiEcho(apiName string, data []byte, echo []byte) []byte {
+	sendData(struct {
+		Action  string `json:"action"`
+		ApiName string `json:"api_name"`
+		Data    []byte `json:"data"`
+		Echo    []byte `json:"echo"`
+	}{
+		Action:  "send_api",
+		ApiName: apiName,
+		Data:    data,
+		Echo:    echo,
+	})
+	defer sendRecvMap.Delete(string(echo))
 	var exists = false
 	var msg interface{}
 	for !exists {
 		time.Sleep(100 * time.Millisecond)
-		msg, exists = sendRecvMap.Get(echo)
+		msg, exists = sendRecvMap.Get(string(echo))
 	}
 	return []byte(msg.(Message).RawMessage)
 
 }
 
 func SendPoke(userId int64, groupId int64) {
-	sendData("send_poke", strconv.FormatInt(userId, 10), strconv.FormatInt(groupId, 10))
-}
-
-func Send(cmd string, args []string, hasReturn bool) string {
-	echo := ""
-	if hasReturn {
-		echo = RandomString(64)
-		args = append(args, echo)
-	}
-	sendData(cmd, args...)
-	if hasReturn {
-		defer sendRecvMap.Delete(echo)
-		var exists = false
-		var msg interface{}
-		for !exists {
-			time.Sleep(100 * time.Millisecond)
-			msg, exists = sendRecvMap.Get(echo)
-		}
-		return msg.(Message).RawMessage
-	} else {
-		return ""
-	}
+	sendData(struct {
+		Action  string `json:"action"`
+		UserId  int64  `json:"user_id"`
+		GroupId int64  `json:"group_id"`
+	}{
+		Action:  "send_poke",
+		UserId:  userId,
+		GroupId: groupId,
+	})
 }
 
 func SendOperator(target, operator string, args []string) {
-	args = append([]string{target, operator}, args...)
-	sendData("operator", args...)
+	sendData(struct {
+		Action    string   `json:"action"`
+		ApiName   string   `json:"api_name"`
+		SubType   string   `json:"sub_type"`
+		Arguments []string `json:"arguments"`
+	}{
+		Action:    "operator",
+		ApiName:   target,
+		SubType:   operator,
+		Arguments: args,
+	})
 }
