@@ -39,6 +39,10 @@ type Message struct {
 	PostType      string        `json:"post_type"`
 	UserId        int64         `json:"user_id"`
 	GroupId       int64         `json:"group_id"`
+	GroupName     string        `json:"group_name"`
+	Font          int           `json:"font"`
+	RealSeq       int           `json:"real_seq"`
+	MessageSeq    int           `json:"message_seq"`
 	MessageType   string        `json:"message_type"`
 	SubType       string        `json:"sub_type"`
 	MessageId     int64         `json:"message_id"`
