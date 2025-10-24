@@ -30,6 +30,7 @@ import "github.com/MikaBot-Project/MikaPluginLib/pluginIO"
 > 建议在main函数结尾添加以下代码
 >
 > ```go
+> var data pluginIO.Message
 > for {
 > 	data = <-pluginIO.MessageChan
 > 	log.Println("type: ", data.PostType)
