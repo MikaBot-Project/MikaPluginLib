@@ -41,7 +41,7 @@ func ReadJson(fileName string, config any) {
 	fileInfo, _ := jsonFile.Stat()
 	var bytes []byte
 	if fileInfo.Size() < 3 {
-		bytes, err = json.Marshal(config)
+		bytes, err = json.MarshalIndent(config, "", "    ")
 		if err != nil {
 			return
 		}
@@ -101,7 +101,7 @@ func SaveJson(fileName string, config any) {
 		}
 	}(jsonFile)
 	var bytes []byte
-	bytes, err = json.Marshal(config)
+	bytes, err = json.MarshalIndent(config, "", "    ")
 	if err != nil {
 		return
 	}

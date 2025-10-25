@@ -90,7 +90,7 @@ func init() {
 		var data []byte
 		var err error
 		for {
-			data, err = inReader.ReadSlice('\n')
+			data, err = inReader.ReadBytes('\n')
 			if len(data) == 0 {
 				continue
 			}
