@@ -23,13 +23,14 @@ func RandomString(length int) string {
 	return string(b)
 }
 
-func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (messageId []int) {
+func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64, selfId int64) (messageId []int) {
 	echo := fmt.Sprintf("send_msg_%s", RandomString(64))
 	message := any(msg)
 	send := struct {
 		Action  string `json:"action"`
 		UserId  int64  `json:"user_id"`
 		GroupId int64  `json:"group_id"`
+		SelfId  int64  `json:"self_id"`
 		SubType string `json:"sub_type"`
 		Data    []byte `json:"data"`
 		Echo    []byte `json:"echo"`
@@ -38,6 +39,7 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 		Echo:    []byte(echo),
 		UserId:  userId,
 		GroupId: groupId,
+		SelfId:  selfId,
 	}
 	switch message.(type) {
 	case string:
@@ -59,11 +61,11 @@ func SendMessage[T string | []MessageItem](msg T, userId int64, groupId int64) (
 	return messageId
 }
 
-func SendApi(apiName string, data []byte) []byte {
-	return SendApiEcho(apiName, data, fmt.Sprintf("send_api_%s", RandomString(64)))
+func SendApi(apiName string, data []byte, selfId int64) []byte {
+	return SendApiEcho(apiName, data, fmt.Sprintf("send_api_%s", RandomString(64)), selfId)
 }
 
-func SendApiEcho(apiName string, data []byte, echo any) []byte {
+func SendApiEcho(apiName string, data []byte, echo any, selfId int64) []byte {
 	var echoData []byte
 	switch echo.(type) {
 	case []byte:
@@ -74,6 +76,7 @@ func SendApiEcho(apiName string, data []byte, echo any) []byte {
 	sendData(struct {
 		Action  string `json:"action"`
 		ApiName string `json:"api_name"`
+		SelfId  int64  `json:"self_id"`
 		Data    []byte `json:"data"`
 		Echo    []byte `json:"echo"`
 	}{
@@ -81,6 +84,7 @@ func SendApiEcho(apiName string, data []byte, echo any) []byte {
 		ApiName: apiName,
 		Data:    data,
 		Echo:    echoData,
+		SelfId:  selfId,
 	})
 	defer sendRecvMap.Delete(string(echoData))
 	var exists = false
@@ -93,14 +97,16 @@ func SendApiEcho(apiName string, data []byte, echo any) []byte {
 
 }
 
-func SendPoke(userId int64, groupId int64) {
+func SendPoke(userId int64, groupId int64, selfId int64) {
 	sendData(struct {
 		Action  string `json:"action"`
 		UserId  int64  `json:"user_id"`
+		SelfId  int64  `json:"self_id"`
 		GroupId int64  `json:"group_id"`
 	}{
 		Action:  "send_poke",
 		UserId:  userId,
+		SelfId:  selfId,
 		GroupId: groupId,
 	})
 }
