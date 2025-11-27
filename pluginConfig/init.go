@@ -31,7 +31,7 @@ func init() {
 func ReadJson(fileName string, config any) {
 	readJsonMap[fileName] = config
 	jsonFile, err := os.OpenFile(fmt.Sprintf("%s%s", configPath, fileName),
-		os.O_RDONLY|os.O_CREATE, 0666)
+		os.O_RDONLY|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
